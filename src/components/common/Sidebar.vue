@@ -106,9 +106,8 @@ export default {
                 //     title: '自定义图标'
                 // },
                 {
-                    icon: 'el-icon-pie-chart',
                     index: 'charts',
-                    title: '回校统计'
+                    title: '回校事件管理'
                 },
                 // {
                 //     icon: 'el-icon-rank',

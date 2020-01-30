@@ -1,10 +1,10 @@
 <template>
     <div class="header">
-        <!-- 折叠按钮 -->
-        <div class="collapse-btn" @click="collapseChage">
-            <i v-if="!collapse" class="el-icon-s-fold"></i>
-            <i v-else class="el-icon-s-unfold"></i>
-        </div>
+<!--        &lt;!&ndash; 折叠按钮 &ndash;&gt;-->
+<!--        <div class="collapse-btn" @click="collapseChage">-->
+<!--            <i v-if="!collapse" class="el-icon-s-fold"></i>-->
+<!--            <i v-else class="el-icon-s-unfold"></i>-->
+<!--        </div>-->
         <div class="logo">毕业生回校统计</div>
         <div class="header-right">
             <div class="header-user-con">
@@ -34,13 +34,13 @@
                 <!-- 用户名下拉菜单 -->
                 <el-dropdown class="user-name" trigger="click" @command="handleCommand">
                     <span class="el-dropdown-link">
-                        {{username}}
+                        {{ username }}
                         <i class="el-icon-caret-bottom"></i>
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <a href="https://github.com/lin-xin/vue-manage-system" target="_blank">
-                            <el-dropdown-item>项目仓库</el-dropdown-item>
-                        </a>
+                        <!--                        <a href="https://github.com/lin-xin/vue-manage-system" target="_blank">-->
+                        <!--                            <el-dropdown-item>项目仓库</el-dropdown-item>-->
+                        <!--                        </a>-->
                         <el-dropdown-item divided command="loginout">退出登录</el-dropdown-item>
                     </el-dropdown-menu>
                 </el-dropdown>
@@ -73,44 +73,44 @@ export default {
                 this.$router.push('/login');
             }
         },
-        // 侧边栏折叠
-        collapseChage() {
-            this.collapse = !this.collapse;
-            bus.$emit('collapse', this.collapse);
-        },
+        // // 侧边栏折叠
+        // collapseChage() {
+        //     this.collapse = !this.collapse;
+        //     bus.$emit('collapse', this.collapse);
+        // },
         // 全屏事件
-        handleFullScreen() {
-            let element = document.documentElement;
-            if (this.fullscreen) {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitCancelFullScreen) {
-                    document.webkitCancelFullScreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-            } else {
-                if (element.requestFullscreen) {
-                    element.requestFullscreen();
-                } else if (element.webkitRequestFullScreen) {
-                    element.webkitRequestFullScreen();
-                } else if (element.mozRequestFullScreen) {
-                    element.mozRequestFullScreen();
-                } else if (element.msRequestFullscreen) {
-                    // IE11
-                    element.msRequestFullscreen();
-                }
-            }
-            this.fullscreen = !this.fullscreen;
-        }
+        // handleFullScreen() {
+        //     let element = document.documentElement;
+        //     if (this.fullscreen) {
+        //         if (document.exitFullscreen) {
+        //             document.exitFullscreen();
+        //         } else if (document.webkitCancelFullScreen) {
+        //             document.webkitCancelFullScreen();
+        //         } else if (document.mozCancelFullScreen) {
+        //             document.mozCancelFullScreen();
+        //         } else if (document.msExitFullscreen) {
+        //             document.msExitFullscreen();
+        //         }
+        //     } else {
+        //         if (element.requestFullscreen) {
+        //             element.requestFullscreen();
+        //         } else if (element.webkitRequestFullScreen) {
+        //             element.webkitRequestFullScreen();
+        //         } else if (element.mozRequestFullScreen) {
+        //             element.mozRequestFullScreen();
+        //         } else if (element.msRequestFullscreen) {
+        //             // IE11
+        //             element.msRequestFullscreen();
+        //         }
+        //     }
+        //     this.fullscreen = !this.fullscreen;
+        // }
     },
-    mounted() {
-        if (document.body.clientWidth < 1500) {
-            this.collapseChage();
-        }
-    }
+    // mounted() {
+    //     if (document.body.clientWidth < 1500) {
+    //         this.collapseChage();
+    //     }
+    // }
 };
 </script>
 <style scoped>
@@ -132,6 +132,7 @@ export default {
     float: left;
     width: 250px;
     line-height: 70px;
+    margin-left: 20px;
 }
 .header-right {
     float: right;
