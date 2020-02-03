@@ -1,10 +1,10 @@
 <template>
     <div class="header">
-<!--        &lt;!&ndash; 折叠按钮 &ndash;&gt;-->
-<!--        <div class="collapse-btn" @click="collapseChage">-->
-<!--            <i v-if="!collapse" class="el-icon-s-fold"></i>-->
-<!--            <i v-else class="el-icon-s-unfold"></i>-->
-<!--        </div>-->
+        <!-- 折叠按钮 -->
+        <div class="collapse-btn" @click="collapseChage">
+            <i v-if="!collapse" class="el-icon-s-fold"></i>
+            <i v-else class="el-icon-s-unfold"></i>
+        </div>
         <div class="logo">毕业生回校统计</div>
         <div class="header-right">
             <div class="header-user-con">
@@ -73,11 +73,11 @@ export default {
                 this.$router.push('/login');
             }
         },
-        // // 侧边栏折叠
-        // collapseChage() {
-        //     this.collapse = !this.collapse;
-        //     bus.$emit('collapse', this.collapse);
-        // },
+        // 侧边栏折叠
+        collapseChage() {
+            this.collapse = !this.collapse;
+            bus.$emit('collapse', this.collapse);
+        },
         // 全屏事件
         // handleFullScreen() {
         //     let element = document.documentElement;
@@ -106,11 +106,11 @@ export default {
         //     this.fullscreen = !this.fullscreen;
         // }
     },
-    // mounted() {
-    //     if (document.body.clientWidth < 1500) {
-    //         this.collapseChage();
-    //     }
-    // }
+    mounted() {
+        if (document.body.clientWidth < 1500) {
+            this.collapseChage();
+        }
+    }
 };
 </script>
 <style scoped>
@@ -132,7 +132,6 @@ export default {
     float: left;
     width: 250px;
     line-height: 70px;
-    margin-left: 20px;
 }
 .header-right {
     float: right;

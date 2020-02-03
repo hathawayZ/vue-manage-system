@@ -5,15 +5,21 @@ Vue.use(Router);
 
 export default new Router({
     routes: [
-        // {
-        //     path: '/',
-        //     redirect: '/charts'
-        // },
         {
             path: '/',
             component: () => import(/* webpackChunkName: "home" */ '../components/common/Home.vue'),
-            meta: { title: '自述文件' },
+            meta: { title: '返校活动管理' },
+        },
+        {
+            path: '/',
+            component: () => import(/* webpackChunkName: "home" */ '../components/common/Home.vue'),
+            meta: { title: '返校活动管理' },
             children: [
+                {
+                    path: '/table',
+                    component: () => import('../components/page/ManageTable.vue'),
+                    meta: { title: '返校活动管理' }
+                }
                 // {
                 //     // 图片上传组件
                 //     path: '/upload',
@@ -67,9 +73,9 @@ export default new Router({
             component: () => import(/* webpackChunkName: "login" */ '../components/page/Login.vue'),
             meta: { title: '登录' }
         },
-        {
-            path: '*',
-            redirect: '/404'
-        }
+        // {
+        //     path: '*',
+        //     redirect: '/404'
+        // }
     ]
 });
