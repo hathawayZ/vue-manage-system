@@ -40,17 +40,28 @@ export default {
             collapse: false,
             chartitems: [
                 {
-                    icon: 'iconfont icon-manage',
-                    index: 'table',
-                    title: '回校事件管理'
+                    icon: 'el-icon-s-data',
+                    index: '/chart/2',
+                    title: '返校密度气泡图'
                 },
                 {
-                    icon: 'iconfont icon-manage',
-                    index: 'charts/api',
-                    title: '回校统计气泡图'
+                    icon: 'el-icon-s-data',
+                    index: '/chart/3',
+                    title: '微博热度气泡图'
                 }
             ],
-            manageitems: []
+            manageitems: [
+                {
+                    icon: 'el-icon-s-data',
+                    index: '/events/2',
+                    title: '返校密度事件管理'
+                },
+                {
+                    icon: 'el-icon-s-data',
+                    index: '/events/3',
+                    title: '微博热度事件管理'
+                }
+            ]
         };
     },
     computed: {
@@ -59,7 +70,8 @@ export default {
             return this.$route.path;
         },
         hasManage() {
-            return this.manageitems.length != 0;
+            const role = localStorage.getItem('ms_username');
+            return role && this.manageitems.length != 0;
         }
     },
     mounted() {
