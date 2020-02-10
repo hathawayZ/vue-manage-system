@@ -7,13 +7,13 @@
         </div>
         <div class="logo">毕业生回校统计</div>
         <div class="header-right">
-            <div class="header-user-con">
+            <div v-if="username" class="header-user-con">
                 <!-- 全屏显示 -->
                 <!-- <div class="btn-fullscreen" @click="handleFullScreen">
                     <el-tooltip effect="dark" :content="fullscreen?`取消全屏`:`全屏`" placement="bottom">
                         <i class="el-icon-rank"></i>
                     </el-tooltip>
-                </div> -->
+                </div>-->
                 <!-- 消息中心 -->
                 <!-- <div class="btn-bell">
                     <el-tooltip
@@ -26,7 +26,7 @@
                         </router-link>
                     </el-tooltip>
                     <span class="btn-bell-badge" v-if="message"></span>
-                </div> -->
+                </div>-->
                 <!-- 用户头像 -->
                 <div class="user-avator">
                     <img src="../../assets/img/img.jpg" />
@@ -45,6 +45,9 @@
                     </el-dropdown-menu>
                 </el-dropdown>
             </div>
+            <div v-else class="header-user-con">
+                <el-button round @click="handleLogin">管理员登陆</el-button>
+            </div>
         </div>
     </div>
 </template>
@@ -62,7 +65,7 @@ export default {
     computed: {
         username() {
             let username = localStorage.getItem('ms_username');
-            return username ? username : this.name;
+            return username;
         }
     },
     methods: {
@@ -70,14 +73,17 @@ export default {
         handleCommand(command) {
             if (command == 'loginout') {
                 localStorage.removeItem('ms_username');
-                this.$router.push('/login');
+                this.$router.push('/');
             }
+        },
+        handleLogin() {
+            this.$router.push('/login');
         },
         // 侧边栏折叠
         collapseChage() {
             this.collapse = !this.collapse;
             bus.$emit('collapse', this.collapse);
-        },
+        }
         // 全屏事件
         // handleFullScreen() {
         //     let element = document.documentElement;

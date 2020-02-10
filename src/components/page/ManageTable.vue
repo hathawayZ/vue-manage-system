@@ -1,6 +1,6 @@
 <template>
     <div>
-        <el-form ref="form1"  :inline="true">
+        <el-form ref="form1" :inline="true">
             <el-form-item v-for="(item, index) in formData" :key="index" :label="item.label">
                 <el-date-picker
                     v-model="item.date"
@@ -8,8 +8,7 @@
                     range-separator="至"
                     start-placeholder="开始月份"
                     end-placeholder="结束月份"
-                >
-                </el-date-picker>
+                ></el-date-picker>
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="onSubmit">查询</el-button>
@@ -20,15 +19,20 @@
         </el-form>
         <el-table ref="filterTable" :data="tableData" style="width: 100%">
             <template v-for="item in table">
-                <el-table-column :prop="item.prop" :label="item.label" v-if="item.prop === 'date'" sortable></el-table-column>
+                <el-table-column
+                    :prop="item.prop"
+                    :label="item.label"
+                    v-if="item.prop === 'date'"
+                    sortable
+                ></el-table-column>
                 <el-table-column v-else :prop="item.prop" :label="item.label"></el-table-column>
             </template>
-            <el-table-column prop="edit" label="编辑" @click="editEvent" width="50"> </el-table-column>
+            <el-table-column prop="edit" label="编辑" @click="editEvent" width="50"></el-table-column>
             <el-table-column prop="delete" label="删除" @click="deleteEvent" width="50"></el-table-column>
         </el-table>
-        <el-dialog title="增加" :visible.sync="dialogVisible" width="30%" >
-            <el-form ref="form2"  label-width="80px">
-                <template v-for="item in form" >
+        <el-dialog title="增加" :visible.sync="dialogVisible" width="30%">
+            <el-form ref="form2" label-width="80px">
+                <template v-for="item in form">
                     <el-form-item :label="item.label">
                         <el-input v-model="item.prop"></el-input>
                     </el-form-item>
@@ -50,20 +54,20 @@ export default {
             form: [
                 {
                     label: '返校时间',
-                    prop: '',
+                    prop: ''
                 },
                 {
                     label: '活动时间',
-                    prop: '',
+                    prop: ''
                 },
                 {
                     label: '新闻链接',
-                    prop: '',
+                    prop: ''
                 },
                 {
                     label: '新闻标题',
-                    prop: '',
-                },
+                    prop: ''
+                }
             ],
             formData: [
                 {
@@ -122,7 +126,36 @@ export default {
             dialogVisible: false
         };
     },
+    mounted() {
+        this.updateData();
+    },
+    watch: {
+        $route(to, from) {
+            // 对路由变化作出响应,当使用本页面传入不同参数时更新数据
+            this.updateData();
+        }
+    },
     methods: {
+        updateData() {
+            this.$axios
+                .get(this.baseUrl + '/api/section/' + this.$route.params.id + '/event')
+                .then(response => {
+                    window.console.log(response);
+                    this.tableData = [];
+                    for (var i = 0; i < response.data.length; i++) {
+                        this.tableData.push({
+                            date: response.data[i].x,
+                            grade: response.data[i].y,
+                            address: response.data[i].url,
+                            edit: '编辑',
+                            delete: '删除'
+                        });
+                    }
+                })
+                .catch(error => {
+                    window.console.log(error);
+                });
+        },
         formatter(row, column) {
             return row.address;
         },
@@ -130,7 +163,7 @@ export default {
             console.log(this.form.eventDate);
         },
         onAdd() {
-            this.dialogVisible = true
+            this.dialogVisible = true;
         },
         editEvent() {},
         deleteEvent() {}

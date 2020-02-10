@@ -4,34 +4,41 @@ import Router from 'vue-router';
 Vue.use(Router);
 
 export default new Router({
-    routes: [
-        {
+    routes: [{
             path: '/',
-            component: () => import(/* webpackChunkName: "home" */ '../components/common/Home.vue'),
-            meta: { title: '返校活动管理' },
+            component: () => import( /* webpackChunkName: "home" */ '../components/common/Home.vue'),
+            meta: {
+                title: '返校活动管理'
+            },
         },
         {
             path: '/',
-            component: () => import(/* webpackChunkName: "home" */ '../components/common/Home.vue'),
-            meta: { title: '返校活动管理' },
-            children: [
-                {
-                    path: '/table',
+            component: () => import( /* webpackChunkName: "home" */ '../components/common/Home.vue'),
+            meta: {
+                title: '返校活动管理'
+            },
+            children: [{
+                    path: '/events/:id',
                     component: () => import('../components/page/ManageTable.vue'),
-                    meta: { title: '返校活动管理' }
-                }
+                    meta: {
+                        title: '返校活动管理',
+                        permission: true
+                    }
+                },
                 // {
                 //     // 图片上传组件
                 //     path: '/upload',
                 //     component: () => import(/* webpackChunkName: "upload" */ '../components/page/Upload.vue'),
                 //     meta: { title: '文件上传' }
                 // },
-                // {
-                //     // vue-schart组件
-                //     path: '/charts',
-                //     component: () => import(/* webpackChunkName: "chart" */ '../components/page/BaseCharts.vue'),
-                //     meta: { title: 'schart图表' }
-                // },
+                {
+                    // vue-schart组件
+                    path: '/chart/:id',
+                    component: () => import( /* webpackChunkName: "chart" */ '../components/page/BaseCharts.vue'),
+                    meta: {
+                        title: 'schart图表'
+                    }
+                },
                 // {
                 //     // 拖拽列表组件
                 //     path: '/drag',
@@ -70,8 +77,10 @@ export default new Router({
         },
         {
             path: '/login',
-            component: () => import(/* webpackChunkName: "login" */ '../components/page/Login.vue'),
-            meta: { title: '登录' }
+            component: () => import( /* webpackChunkName: "login" */ '../components/page/Login.vue'),
+            meta: {
+                title: '登录'
+            }
         },
         // {
         //     path: '*',
