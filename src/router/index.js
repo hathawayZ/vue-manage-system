@@ -25,6 +25,14 @@ export default new Router({
                         permission: true
                     }
                 },
+                {
+                    path: '/section',
+                    component: () => import('../components/page/ManageSection.vue'),
+                    meta: {
+                        title: '栏目管理',
+                        permission: true
+                    }
+                },
                 // {
                 //     // 图片上传组件
                 //     path: '/upload',

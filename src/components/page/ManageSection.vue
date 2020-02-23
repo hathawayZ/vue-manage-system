@@ -1,22 +1,9 @@
 <template>
     <div>
         <el-breadcrumb separator="/" style="margin-bottom: 15px">
-            <el-breadcrumb-item>事件管理</el-breadcrumb-item>
-            <el-breadcrumb-item>{{pageTitle}}事件管理</el-breadcrumb-item>
+            <el-breadcrumb-item>栏目管理</el-breadcrumb-item>
         </el-breadcrumb>
         <el-form ref="form1" :inline="true">
-            <el-form-item v-for="(item, index) in queryForm" :key="index" :label="item.label">
-                <el-date-picker
-                    v-model="item.date"
-                    :type="item.type"
-                    range-separator="至"
-                    :start-placeholder="getPlaceholder(item.type).start"
-                    :end-placeholder="getPlaceholder(item.type).end"
-                ></el-date-picker>
-            </el-form-item>
-            <el-form-item>
-                <el-button type="primary" @click="onQuery">查询</el-button>
-            </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="onAdd">增加</el-button>
             </el-form-item>
@@ -81,6 +68,8 @@
 </template>
 
 <script>
+import bus from '../common/bus';
+
 function timeStamp2String(time) {
     var datetime = new Date(time * 1000);
     // var year = datetime.getFullYear();
@@ -100,67 +89,65 @@ export default {
         return {
             newForm: [
                 {
-                    label: '返校时间',
-                    data: '',
-                    type: 'date'
-                },
-                {
-                    label: '入学年份',
-                    data: '',
-                    type: 'year'
-                },
-                {
-                    label: '新闻标题',
+                    label: '栏目标题',
                     data: '',
                     type: 'text'
                 },
                 {
-                    label: '新闻链接',
+                    label: 'x轴标题',
                     data: '',
                     type: 'text'
-                }
-            ],
-            queryForm: [
-                {
-                    label: '返校时间',
-                    date: '',
-                    type: 'monthrange'
                 },
                 {
-                    label: '入学年份',
-                    date: '',
-                    type: 'monthrange'
+                    label: 'x轴单位',
+                    data: '',
+                    type: 'text'
+                },
+                {
+                    label: 'y轴标题',
+                    data: '',
+                    type: 'text'
+                },
+                {
+                    label: 'y轴单位',
+                    data: '',
+                    type: 'text'
                 }
             ],
             tableColumn: [
                 {
-                    prop: 'x',
-                    label: '返校时间'
-                },
-                {
-                    prop: 'y',
-                    label: '入学年份'
-                },
-                {
                     prop: 'name',
-                    label: '新闻标题'
+                    label: '栏目标题'
                 },
                 {
-                    prop: 'url',
-                    label: '新闻链接'
+                    prop: 'x_title',
+                    label: 'x轴标题'
+                },
+                {
+                    prop: 'x_unit',
+                    label: 'x轴单位'
+                },
+                {
+                    prop: 'y_title',
+                    label: 'y轴标题'
+                },
+                {
+                    prop: 'y_unit',
+                    label: 'y轴单位'
                 }
             ],
             tableData: [
                 {
-                    date: '2016-05-02',
-                    grade: '王小虎',
-                    address: '上海市普陀区金沙江路 1518 弄'
+                    name: '返校信息',
+                    x_title: '返校时间',
+                    x_unit: '',
+                    y_title: '入学时间',
+                    y_unit: '年'
                 }
             ],
             dialogVisible: false,
             dialogAction: 'add', // 'add' or 'edit'
-            editId: null,
-            pageTitle: ''
+            editId: null
         };
     },
     mounted() {
@@ -178,67 +165,26 @@ export default {
         }
     },
     methods: {
-        getPlaceholder(type) {
-            if (type === 'monthrange') {
-                return {
-                    start: '开始月份',
-                    end: '结束月份'
-                };
-            } else {
-                return {
-                    start: '开始日期',
-                    end: '结束日期'
-                };
-            }
-        },
         updateData() {
             // 获取section信息
             this.$axios
-                .get(this.baseUrl + '/api/section/' + this.$route.params.id)
+                .get(this.baseUrl + '/api/section')
                 .then(response => {
-                    window.console.log('get section ', this.$route.params.id, response);
-                    var xtitle = response.data.graph.x_axis.title;
-                    var ytitle = response.data.graph.y_axis.title;
-
-                    this.queryForm[0].label = xtitle;
-                    this.queryForm[1].label = ytitle;
-                    this.newForm[0].label = xtitle;
-                    this.newForm[1].label = ytitle;
-                    this.tableColumn[0].label = xtitle;
-                    this.tableColumn[1].label = ytitle;
-
-                    this.pageTitle = response.data.name;
-                })
-                .catch(error => {
-                    window.console.log(error);
-                });
-
-            this.$axios
-                .get(this.baseUrl + '/api/section/' + this.$route.params.id + '/event')
-                .then(response => {
-                    window.console.log(response);
                     this.tableData = [];
-                    for (var i = 0; i < response.data.length; i++) {
+                    for (var section of response.data) {
                         this.tableData.push({
-                            id: response.data[i].id,
-                            x: timeStamp2String(response.data[i].x),
-                            y: timeStamp2String(response.data[i].y).slice(0, 4),
-                            name: response.data[i].name,
-                            url: response.data[i].url,
-                            x_ts: response.data[i].x,
-                            y_ts: response.data[i].y
+                            id: section.id,
+                            name: section.name,
+                            x_title: section.graph.x_axis.title,
+                            x_unit: section.graph.x_axis.unit,
+                            y_title: section.graph.y_axis.title,
+                            y_unit: section.graph.y_axis.unit
                         });
                     }
                 })
                 .catch(error => {
                     window.console.log(error);
                 });
-        },
-        formatter(row, column) {
-            return row.address;
-        },
-        onQuery() {
-            console.log(this.queryForm);
         },
         clearDialog() {
             for (var i = 0; i < this.newForm.length; i++) {
@@ -258,22 +204,29 @@ export default {
                     return;
                 }
             }
-            var newEvent = {
-                name: this.newForm[2].data,
-                desc: '',
-                x: this.newForm[0].data.getTime() / 1000,
-                y: this.newForm[1].data.getTime() / 1000,
-                url: this.newForm[3].data
+            var newSection = {
+                name: this.newForm[0].data,
+                graph: {
+                    x_axis: {
+                        title: this.newForm[1].data,
+                        unit: this.newForm[2].data
+                    },
+                    y_axis: {
+                        title: this.newForm[3].data,
+                        unit: this.newForm[4].data
+                    }
+                }
             };
             if (this.dialogAction == 'add') {
-                console.log('new event:', newEvent);
+                console.log('new section:', newSection);
                 this.$axios
-                    .post(this.baseUrl + '/api/section/' + this.$route.params.id + '/event', newEvent)
+                    .post(this.baseUrl + '/api/section', newSection)
                     .then(response => {
                         console.log(response);
                         if (response.data == 'ok') {
                             this.dialogVisible = false;
                             this.updateData();
+                            this.refreshSidebar();
                         } else {
                             console.log(response);
                             this.$message.error(response.data);
@@ -284,15 +237,16 @@ export default {
                         window.console.log(error);
                     });
             } else {
-                console.log('edit event:', newEvent);
-                newEvent['id'] = this.editId;
+                console.log('edit section:', newSection);
+                newSection['id'] = this.editId;
                 this.$axios
-                    .put(this.baseUrl + '/api/section/' + this.$route.params.id + '/event/' + this.editId, newEvent)
+                    .put(this.baseUrl + '/api/section/' + this.editId, newSection)
                     .then(response => {
                         console.log(response);
                         if (response.data == 'ok') {
                             this.dialogVisible = false;
                             this.updateData();
+                            this.refreshSidebar();
                         } else {
                             console.log(response);
                             this.$message.error(response.data);
@@ -313,22 +267,23 @@ export default {
             this.editId = ele.row.id;
 
             // set origin data
-            this.newForm[0].data = new Date(ele.row.x_ts * 1000);
-            this.newForm[1].data = new Date(ele.row.y_ts * 1000);
-            this.newForm[2].data = ele.row.name;
-            this.newForm[3].data = ele.row.url;
+            this.newForm[0].data = ele.row.name;
+            this.newForm[1].data = ele.row.x_title;
+            this.newForm[2].data = ele.row.x_unit;
+            this.newForm[3].data = ele.row.y_title;
+            this.newForm[4].data = ele.row.y_unit;
         },
         onDelete(ele) {
             console.log('delete ', ele.row.id);
 
-            this.$confirm('此操作将永久删除该事件, 是否继续?', '提示', {
+            this.$confirm('此操作将永久删除该栏目及相关数据, 是否继续?', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
                 type: 'warning'
             })
                 .then(() => {
                     this.$axios
-                        .delete(this.baseUrl + '/api/section/' + this.$route.params.id + '/event/' + ele.row.id)
+                        .delete(this.baseUrl + '/api/section/' + ele.row.id)
                         .then(response => {
                             console.log(response);
                             if (response.data == 'ok') {
@@ -337,6 +292,7 @@ export default {
                                     type: 'success',
                                     message: '删除成功!'
                                 });
+                                this.refreshSidebar();
                             } else {
                                 console.log(response);
                                 this.$message.error(response.data);
@@ -353,6 +309,9 @@ export default {
                     //     message: '已取消删除'
                     // });
                 });
+        },
+        refreshSidebar() {
+            bus.$emit('updateSidebar');
         }
     }
 };

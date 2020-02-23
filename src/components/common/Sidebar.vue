@@ -16,7 +16,7 @@
                     <span slot="title">{{ item.title }}</span>
                 </el-menu-item>
             </template>
-            <el-submenu v-if="hasManage">
+            <el-submenu v-if="hasManage" index="manageEvent">
                 <template slot="title">
                     <i class="el-icon-menu"></i>
                     <span>事件管理</span>
@@ -28,6 +28,11 @@
                     </el-menu-item>
                 </template>
             </el-submenu>
+
+            <el-menu-item v-if="hasManage" index="/section">
+                <i class="el-icon-s-order"></i>
+                <span slot="title">栏目管理</span>
+            </el-menu-item>
         </el-menu>
     </div>
 </template>
@@ -74,39 +79,51 @@ export default {
             return role && this.manageitems.length != 0;
         }
     },
-    mounted() {
-        const role = localStorage.getItem('ms_username');
-        this.$axios
-            .get(this.baseUrl + '/api/section')
-            .then(response => {
-                window.console.log(response);
-                this.chartitems = [];
-                this.manageitems = [];
-                for (var i = 0; i < response.data.length; i++) {
-                    this.chartitems.push({
-                        icon: 'el-icon-s-data',
-                        index: '/chart/' + response.data[i].id,
-                        title: response.data[i].name + '气泡图'
-                    });
-                    if (role) {
-                        this.manageitems.push({
-                            icon: 'el-icon-s-tools',
-                            index: '/events/' + response.data[i].id,
-                            title: response.data[i].name + '事件管理'
+    methods: {
+        updateData(redirect) {
+            // redirect为true则导航到第一个页面
+            const role = localStorage.getItem('ms_username');
+            this.$axios
+                .get(this.baseUrl + '/api/section')
+                .then(response => {
+                    window.console.log(response);
+                    this.chartitems = [];
+                    this.manageitems = [];
+                    for (var i = 0; i < response.data.length; i++) {
+                        this.chartitems.push({
+                            icon: 'el-icon-s-data',
+                            index: '/chart/' + response.data[i].id,
+                            title: response.data[i].name + '气泡图'
                         });
+                        if (role) {
+                            this.manageitems.push({
+                                icon: 'el-icon-s-tools',
+                                index: '/events/' + response.data[i].id,
+                                title: response.data[i].name + '事件管理'
+                            });
+                        }
                     }
-                }
-                this.$router.push(this.chartitems[0].index); // 加载第一个页面
-            })
-            .catch(error => {
-                window.console.log(error);
-            });
+                    if (redirect) {
+                        this.$router.push(this.chartitems[0].index); // 加载第一个页面
+                    }
+                })
+                .catch(error => {
+                    window.console.log(error);
+                });
+        }
+    },
+    mounted() {
+        this.updateData(true);
     },
     created() {
         // 通过 Event Bus 进行组件间通信，来折叠侧边栏
         bus.$on('collapse', msg => {
             this.collapse = msg;
             bus.$emit('collapse-content', msg);
+        });
+        bus.$on('updateSidebar', msg => {
+            console.log('update sidebar');
+            this.updateData(false);
         });
     }
 };

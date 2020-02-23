@@ -2,12 +2,11 @@
     <div>
         <div class="container">
             <div class="schart-box">
-                <div class="content-title">回校统计</div>
-                <!-- <schart class="schart" canvasId="bar" :options="options1"></schart> -->
+                <!-- <div class="content-title">回校统计</div> -->
                 <v-chart class="schart" :options="bar" @click="clickBar" />
                 <el-dialog
                     class="event-dialog"
-                    title="返校活动列表"
+                    :title="dialogTitle"
                     :visible.sync="dialogVisible"
                     width="30%"
                 >
@@ -120,6 +119,9 @@ export default {
         return {
             dialogVisible: false,
             eventList: [],
+            xUnit: '年',
+            yUnit: '级',
+            dataname: '返校活动',
             bar: {
                 backgroundColor: new ECharts.graphic.RadialGradient(0.3, 0.3, 0.8, [
                     {
@@ -132,7 +134,7 @@ export default {
                     }
                 ]),
                 title: {
-                    text: '返校密度气泡图'
+                    text: ''
                 },
                 tooltip: {
                     padding: 10,
@@ -140,24 +142,7 @@ export default {
                     borderColor: '#777',
                     borderWidth: 1,
                     // alwaysShowContent: true,
-                    formatter: function(obj) {
-                        let value = obj.value;
-                        let schema = '';
-                        for (let i = 0; i < value[2] * 2; i += 2) {
-                            schema += i / 2 + 1;
-                            schema += '. ' + value[i + 5] + '</br>';
-                        }
-                        return (
-                            '<div style="border-bottom: 1px solid rgba(255,255,255,.3); font-size: 18px;padding-bottom: 7px;margin-bottom: 7px">' +
-                            value[0] +
-                            '级' +
-                            value[1] +
-                            '年' +
-                            obj.seriesName +
-                            '</div>' +
-                            schema
-                        );
-                    }
+                    formatter: this.tooltipFormatter
                 },
                 xAxis: {
                     type: 'value',
@@ -188,6 +173,11 @@ export default {
                     min: 1955,
                     max: 2020,
                     minInterval: 1,
+                    // nameGap: 40,
+                    // nameLocation: 'middle',
+                    // nameTextStyle: {
+                    //     fontSize: 18
+                    // },
                     splitLine: {
                         show: false
                     },
@@ -213,6 +203,19 @@ export default {
                         filterMode: 'empty'
                         // labelPrecision: 1
                     }
+                    // {
+                    //     type: 'slider',
+                    //     show: true,
+                    //     xAxisIndex: [0],
+                    //     labelPrecision: 0
+                    // },
+                    // {
+                    //     type: 'slider',
+                    //     show: true,
+                    //     yAxisIndex: [0],
+                    //     labelPrecision: 0,
+                    //     left: '93%'
+                    // }
                 ],
                 dataset: {
                     // 在这里设置数据，在别处设不会自动更新图表
@@ -220,7 +223,7 @@ export default {
                 },
                 series: [
                     {
-                        name: '返校活动列表',
+                        name: '气泡图',
                         // data: data,
                         type: 'scatter',
                         symbolSize: function(data) {
@@ -265,6 +268,11 @@ export default {
             this.updateData();
         }
     },
+    computed: {
+        dialogTitle() {
+            return this.dataname + '事件列表';
+        }
+    },
     methods: {
         updateData() {
             this.$axios
@@ -272,6 +280,18 @@ export default {
                 .then(response => {
                     window.console.log(response);
                     this.bar.dataset.source = response.data.graph.data;
+
+                    // set axis and title
+                    this.dataname = response.data.name;
+
+                    this.bar.xAxis.name = response.data.graph.x_axis.title;
+                    this.bar.xAxis.axisLabel.formatter = '{value} ' + response.data.graph.x_axis.unit;
+                    this.xUnit = response.data.graph.x_axis.unit;
+                    this.bar.yAxis.name = response.data.graph.y_axis.title;
+                    this.bar.yAxis.axisLabel.formatter = '{value} ' + response.data.graph.y_axis.unit;
+                    this.yUnit = response.data.graph.y_axis.unit;
+
+                    this.bar.title.text = this.dataname + '气泡图';
                 })
                 .catch(error => {
                     window.console.log(error);
@@ -285,6 +305,28 @@ export default {
                 this.eventList.push({ url: list[i + 4], title: list[i + 5] });
             }
             this.dialogVisible = true;
+        },
+        tooltipFormatter(obj) {
+            let value = obj.value;
+            let schema = '';
+            for (let i = 0; i < value[2] * 2; i += 2) {
+                schema += i / 2 + 1;
+                schema += '. ' + value[i + 5] + '</br>';
+            }
+            // console.log(obj);
+            return (
+                '<div style="border-bottom: 1px solid rgba(255,255,255,.3); font-size: 18px;padding-bottom: 7px;margin-bottom: 7px">' +
+                value[0] +
+                this.xUnit +
+                ' ' +
+                value[1] +
+                this.yUnit +
+                ', ' +
+                this.dataname +
+                '事件列表:' +
+                '</div>' +
+                schema
+            );
         }
     }
 };
