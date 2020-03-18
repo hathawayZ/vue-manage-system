@@ -30,9 +30,16 @@ router.beforeEach((to, from, next) => {
     // if (!role && to.path !== '/login') {
     //     next('/login');
     // } else 
-    if (to.meta.permission) {
-        // 如果是管理员权限则可进入，这里只是简单的模拟管理员权限而已
-        if (role === 'admin')
+    if (to.meta.super_permission) {
+        if (role === "admin") {
+            next();
+        } else {
+            this.$message.error('当前用户没有超级管理员权限');
+            next(flase);
+        }
+    } else if (to.meta.permission) {
+        // 
+        if (role)
             next();
         else {
             next('/login');

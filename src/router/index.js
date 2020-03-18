@@ -33,6 +33,14 @@ export default new Router({
                         permission: true
                     }
                 },
+                {
+                    path: '/user',
+                    component: () => import('../components/page/ManageUser.vue'),
+                    meta: {
+                        title: '用户管理',
+                        super_permission: true
+                    }
+                },
                 // {
                 //     // 图片上传组件
                 //     path: '/upload',

@@ -123,7 +123,7 @@ export default {
         });
         bus.$on('updateSidebar', msg => {
             console.log('update sidebar');
-            this.updateData(false);
+            this.updateData(msg);
         });
     }
 };

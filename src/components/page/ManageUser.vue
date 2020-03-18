@@ -84,7 +84,7 @@ function timeStamp2String(time) {
 }
 
 export default {
-    name: 'ManageTable',
+    name: 'ManageUser',
     data() {
         return {
             newForm: [

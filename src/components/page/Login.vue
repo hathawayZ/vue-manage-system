@@ -33,29 +33,50 @@ export default {
         return {
             param: {
                 username: 'admin',
-                password: '123123',
+                password: ''
             },
             rules: {
                 username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
-                password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-            },
+                password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+            }
         };
     },
     methods: {
         submitForm() {
             this.$refs.login.validate(valid => {
                 if (valid) {
-                    this.$message.success('登录成功');
-                    localStorage.setItem('ms_username', this.param.username);
-                    this.$router.push('/');
+                    var bodyFormData = new FormData();
+                    bodyFormData.set('username', this.param.username);
+                    bodyFormData.set('password', this.param.password);
+                    this.$axios({
+                        method: 'post',
+                        url: this.baseUrl + '/api/user/login',
+                        data: bodyFormData,
+                        headers: { 'Content-Type': 'multipart/form-data' }
+                    })
+                        .then(response => {
+                            window.console.log(response);
+                            if (response.data.startsWith('failed')) {
+                                this.$message.error(response.data);
+                            } else {
+                                this.$message.success('登录成功');
+                                localStorage.setItem('ms_username', this.param.username);
+                                localStorage.setItem('ms_token', response.data);
+                                console.log('receive token:', response.data);
+                                this.$router.push('/');
+                            }
+                        })
+                        .catch(error => {
+                            window.console.log(error);
+                        });
                 } else {
                     this.$message.error('请输入账号和密码');
                     console.log('error submit!!');
                     return false;
                 }
             });
-        },
-    },
+        }
+    }
 };
 </script>
 
