@@ -16,7 +16,7 @@
                     <span slot="title">{{ item.title }}</span>
                 </el-menu-item>
             </template>
-            <el-submenu v-if="hasManage" index="manageEvent">
+            <el-submenu v-if="hasManageEvent" index="manageEvent">
                 <template slot="title">
                     <i class="el-icon-menu"></i>
                     <span>事件管理</span>
@@ -29,9 +29,14 @@
                 </template>
             </el-submenu>
 
-            <el-menu-item v-if="hasManage" index="/section">
+            <el-menu-item v-if="hasManageEvent" index="/section">
                 <i class="el-icon-s-order"></i>
                 <span slot="title">栏目管理</span>
+            </el-menu-item>
+
+            <el-menu-item v-if="hasManageUser" index="/user">
+                <i class="el-icon-user-solid"></i>
+                <span slot="title">用户管理</span>
             </el-menu-item>
         </el-menu>
     </div>
@@ -74,9 +79,13 @@ export default {
             console.log(this.$route.path);
             return this.$route.path;
         },
-        hasManage() {
+        hasManageEvent() {
             const role = localStorage.getItem('ms_username');
             return role && this.manageitems.length != 0;
+        },
+        hasManageUser() {
+            const role = localStorage.getItem('ms_username');
+            return role == 'admin';
         }
     },
     methods: {
