@@ -71,27 +71,31 @@ export default {
                     index: '/events/3',
                     title: '微博热度事件管理'
                 }
-            ]
+            ],
+            hasManageEvent: false,
+            hasManageUser: false
         };
     },
     computed: {
         onRoutes() {
             console.log(this.$route.path);
             return this.$route.path;
-        },
-        hasManageEvent() {
-            const role = localStorage.getItem('ms_username');
-            return role && this.manageitems.length != 0;
-        },
-        hasManageUser() {
-            const role = localStorage.getItem('ms_username');
-            return role == 'admin';
         }
+        // hasManageEvent() {
+        //     const role = localStorage.getItem('ms_username');
+        //     return role && this.manageitems.length != 0;
+        // },
+        // hasManageUser() {
+        //     const role = localStorage.getItem('ms_username');
+        //     return role === 'admin';
+        // }
     },
     methods: {
         updateData(redirect) {
             // redirect为true则导航到第一个页面
             const role = localStorage.getItem('ms_username');
+            this.hasManageEvent = role;
+            this.hasManageUser = role === 'admin';
             this.$axios
                 .get(this.baseUrl + '/api/section')
                 .then(response => {

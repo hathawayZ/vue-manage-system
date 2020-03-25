@@ -43,7 +43,11 @@
             <el-form ref="form2" label-width="80px">
                 <template v-for="item in newForm">
                     <el-form-item :label="item.label" :key="item.key">
-                        <el-input v-if="item.type == 'text'" v-model="item.data"></el-input>
+                        <el-input
+                            v-if="item.type == 'text'"
+                            v-model="item.data"
+                            :placeholder="item.placeholder"
+                        ></el-input>
                         <el-date-picker
                             v-else-if="item.type == 'date'"
                             v-model="item.data"
@@ -184,6 +188,7 @@ export default {
         clearDialog() {
             for (var i = 0; i < this.newForm.length; i++) {
                 this.newForm[i].data = '';
+                this.newForm[i].placeholder = '';
             }
         },
         onAdd() {
@@ -219,6 +224,10 @@ export default {
                     .then(response => {
                         console.log(response);
                         this.dialogVisible = false;
+                        this.$message({
+                            type: 'success',
+                            message: '添加成功!'
+                        });
                         this.updateData();
                         this.refreshSidebar();
                     })
@@ -236,6 +245,10 @@ export default {
                     .then(response => {
                         console.log(response);
                         this.dialogVisible = false;
+                        this.$message({
+                            type: 'success',
+                            message: '修改成功!'
+                        });
                         this.updateData();
                     })
                     .catch(error => {
@@ -254,7 +267,8 @@ export default {
 
             // set origin data
             this.newForm[0].data = ele.row.username;
-            this.newForm[2].data = ele.row.password;
+            this.newForm[1].data = ele.row.password;
+            this.newForm[1].placeholder = '不填则不修改密码';
             this.newForm[2].data = ele.row.name;
             this.newForm[3].data = ele.row.email;
             this.newForm[4].data = ele.row.phone;
