@@ -18,6 +18,9 @@
                 <el-button type="primary" @click="onQuery">查询</el-button>
             </el-form-item>
             <el-form-item>
+                <el-button type="primary" @click="onClearSearch">清除查询</el-button>
+            </el-form-item>
+            <el-form-item>
                 <el-button type="primary" @click="onAdd">增加</el-button>
             </el-form-item>
         </el-form>
@@ -191,8 +194,24 @@ export default {
                 };
             }
         },
+        onClearSearch() {
+            this.queryForm[0].date = '';
+            this.queryForm[1].date = '';
+            this.updateData();
+        },
         updateData() {
             // 获取section信息
+            var param = {};
+            if (this.queryForm[0].date) {
+                // console.log('search x:', this.queryForm[0].date);
+                param.x_low = this.queryForm[0].date[0].getTime() / 1000;
+                param.x_high = this.queryForm[0].date[1].getTime() / 1000;
+            }
+            if (this.queryForm[1].date) {
+                // console.log('search y:', this.queryForm[1].date);
+                param.y_low = this.queryForm[1].date[0].getTime() / 1000;
+                param.y_high = this.queryForm[1].date[1].getTime() / 1000;
+            }
             this.$axios
                 .get(this.baseUrl + '/api/section/' + this.$route.params.id)
                 .then(response => {
@@ -213,8 +232,11 @@ export default {
                     window.console.log(error);
                 });
 
+            console.log('param is ', param);
             this.$axios
-                .get(this.baseUrl + '/api/section/' + this.$route.params.id + '/event')
+                .get(this.baseUrl + '/api/section/' + this.$route.params.id + '/event', {
+                    params: param
+                })
                 .then(response => {
                     window.console.log(response);
                     this.tableData = [];
@@ -238,7 +260,11 @@ export default {
             return row.address;
         },
         onQuery() {
-            console.log(this.queryForm);
+            if (this.queryForm[0].date || this.queryForm[1].date) {
+                this.updateData();
+            } else {
+                this.$message.error('请输入搜索条件');
+            }
         },
         clearDialog() {
             for (var i = 0; i < this.newForm.length; i++) {
