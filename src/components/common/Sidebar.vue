@@ -102,18 +102,19 @@ export default {
                     window.console.log(response);
                     this.chartitems = [];
                     this.manageitems = [];
-                    for (var i = 0; i < response.data.length; i++) {
+                    for (var section of response.data) {
                         this.chartitems.push({
                             icon: 'el-icon-s-data',
-                            index: '/chart/' + response.data[i].id,
-                            title: response.data[i].name + '气泡图'
+                            index: '/chart/' + section.id,
+                            title: section.name + '气泡图'
                         });
                         if (role) {
-                            this.manageitems.push({
-                                icon: 'el-icon-s-tools',
-                                index: '/events/' + response.data[i].id,
-                                title: response.data[i].name + '事件管理'
-                            });
+                            if (section.belongto == role || role == 'admin')
+                                this.manageitems.push({
+                                    icon: 'el-icon-s-tools',
+                                    index: '/events/' + section.id,
+                                    title: section.name + '事件管理'
+                                });
                         }
                     }
                     if (redirect) {

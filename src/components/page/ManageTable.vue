@@ -291,10 +291,13 @@ export default {
                 y: this.newForm[1].data.getTime() / 1000,
                 url: this.newForm[3].data
             };
+            var token = localStorage.getItem('ms_token');
             if (this.dialogAction == 'add') {
                 console.log('new event:', newEvent);
                 this.$axios
-                    .post(this.baseUrl + '/api/section/' + this.$route.params.id + '/event', newEvent)
+                    .post(this.baseUrl + '/api/section/' + this.$route.params.id + '/event', newEvent, {
+                        headers: { Authorization: 'Bearer ' + token }
+                    })
                     .then(response => {
                         console.log(response);
                         if (response.data == 'ok') {
@@ -313,7 +316,9 @@ export default {
                 console.log('edit event:', newEvent);
                 newEvent['id'] = this.editId;
                 this.$axios
-                    .put(this.baseUrl + '/api/section/' + this.$route.params.id + '/event/' + this.editId, newEvent)
+                    .put(this.baseUrl + '/api/section/' + this.$route.params.id + '/event/' + this.editId, newEvent, {
+                        headers: { Authorization: 'Bearer ' + token }
+                    })
                     .then(response => {
                         console.log(response);
                         if (response.data == 'ok') {
@@ -346,6 +351,7 @@ export default {
         },
         onDelete(ele) {
             console.log('delete ', ele.row.id);
+            var token = localStorage.getItem('ms_token');
 
             this.$confirm('此操作将永久删除该事件, 是否继续?', '提示', {
                 confirmButtonText: '确定',
@@ -354,7 +360,13 @@ export default {
             })
                 .then(() => {
                     this.$axios
-                        .delete(this.baseUrl + '/api/section/' + this.$route.params.id + '/event/' + ele.row.id)
+                        .delete(
+                            this.baseUrl + '/api/section/' + this.$route.params.id + '/event/' + ele.row.id,
+                            {},
+                            {
+                                headers: { Authorization: 'Bearer ' + token }
+                            }
+                        )
                         .then(response => {
                             console.log(response);
                             if (response.data == 'ok') {

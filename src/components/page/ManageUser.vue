@@ -236,12 +236,12 @@ export default {
                         window.console.log(error);
                     });
             } else {
-                console.log('edit section:', newuser, {
-                    headers: { Authorization: 'Bearer ' + token }
-                });
+                console.log('edit section:', newuser);
                 newuser['id'] = this.editId;
                 this.$axios
-                    .put(this.baseUrl + '/api/user/' + this.editId, newuser)
+                    .put(this.baseUrl + '/api/user/' + this.editId, newuser, {
+                        headers: { Authorization: 'Bearer ' + token }
+                    })
                     .then(response => {
                         console.log(response);
                         this.dialogVisible = false;
