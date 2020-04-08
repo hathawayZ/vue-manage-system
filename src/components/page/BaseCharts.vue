@@ -161,11 +161,19 @@ export default {
                         show: false
                     },
                     axisLabel: {
-                        formatter: '{value} 年',
+                        // formatter: '{value} 年',
                         showMinLabel: false,
                         showMaxLabel: false
                     },
-                    scale: true
+                    scale: true,
+                    axisPointer: {
+                        show: true,
+                        triggerTooltip: false,
+                        snap: true,
+                        label: {
+                            precision: 0
+                        }
+                    }
                 },
                 yAxis: {
                     type: 'value',
@@ -182,11 +190,19 @@ export default {
                         show: false
                     },
                     axisLabel: {
-                        formatter: '{value} 级',
+                        // formatter: '{value} 级',
                         showMinLabel: false,
                         showMaxLabel: false
                     },
-                    scale: true
+                    scale: true,
+                    axisPointer: {
+                        show: true,
+                        triggerTooltip: false,
+                        snap: true,
+                        label: {
+                            precision: 0
+                        }
+                    }
                 },
                 dataZoom: [
                     {
@@ -286,9 +302,11 @@ export default {
 
                     this.bar.xAxis.name = response.data.graph.x_axis.title;
                     this.bar.xAxis.axisLabel.formatter = '{value} ' + response.data.graph.x_axis.unit;
+                    this.bar.xAxis.axisPointer.label.formatter = this.bar.xAxis.axisLabel.formatter;
                     this.xUnit = response.data.graph.x_axis.unit;
                     this.bar.yAxis.name = response.data.graph.y_axis.title;
                     this.bar.yAxis.axisLabel.formatter = '{value} ' + response.data.graph.y_axis.unit;
+                    this.bar.yAxis.axisPointer.label.formatter = this.bar.yAxis.axisLabel.formatter;
                     this.yUnit = response.data.graph.y_axis.unit;
 
                     this.bar.title.text = this.dataname + '气泡图';
