@@ -1,20 +1,23 @@
 <template>
-    <div>
-        <div class="container">
-            <div class="schart-box">
-                <!-- <div class="content-title">回校统计</div> -->
-                <v-chart class="schart" :options="bar" @click="clickBar" />
-                <el-dialog
-                    class="event-dialog"
-                    :title="dialogTitle"
-                    :visible.sync="dialogVisible"
-                    width="30%"
-                >
-                    <el-row v-for="(item, index) in eventList" :key="index">
-                        <el-link :href="item.url" target="_blank">{{ index + 1 }}. {{ item.title }}</el-link>
-                    </el-row>
-                </el-dialog>
-            </div>
+    <div class="container" ref="chartdiv" style="height: 90%">
+        <div class="schart-box">
+            <!-- <div class="content-title">回校统计</div> -->
+            <v-chart
+                ref="mychart"
+                v-bind:style="{ width: chartwidth, height: chartheight }"
+                :options="bar"
+                @click="clickBar"
+            />
+            <el-dialog
+                class="event-dialog"
+                :title="dialogTitle"
+                :visible.sync="dialogVisible"
+                width="30%"
+            >
+                <el-row v-for="(item, index) in eventList" :key="index">
+                    <el-link :href="item.url" target="_blank">{{ index + 1 }}. {{ item.title }}</el-link>
+                </el-row>
+            </el-dialog>
         </div>
     </div>
 </template>
@@ -123,16 +126,16 @@ export default {
             yUnit: '级',
             dataname: '返校活动',
             bar: {
-                backgroundColor: new ECharts.graphic.RadialGradient(0.3, 0.3, 0.8, [
-                    {
-                        offset: 0,
-                        color: '#f7f8fa'
-                    },
-                    {
-                        offset: 1,
-                        color: '#cdd0d5'
-                    }
-                ]),
+                // backgroundColor: new ECharts.graphic.RadialGradient(0.3, 0.3, 0.8, [
+                //     {
+                //         offset: 0,
+                //         color: '#f7f8fa'
+                //     },
+                //     {
+                //         offset: 1,
+                //         color: '#cdd0d5'
+                //     }
+                // ]),
                 title: {
                     text: ''
                 },
@@ -254,30 +257,44 @@ export default {
                                 },
                                 position: 'top'
                             }
-                        },
-                        itemStyle: {
-                            shadowBlur: 10,
-                            shadowColor: 'rgba(120, 36, 50, 0.5)',
-                            shadowOffsetY: 5,
-                            color: new ECharts.graphic.RadialGradient(0.4, 0.3, 1, [
-                                {
-                                    offset: 0,
-                                    color: 'rgb(251, 118, 123)'
-                                },
-                                {
-                                    offset: 1,
-                                    color: 'rgb(204, 46, 72)'
-                                }
-                            ])
                         }
+                        // itemStyle: {
+                        //     shadowBlur: 10,
+                        //     shadowColor: 'rgba(120, 36, 50, 0.5)',
+                        //     shadowOffsetY: 5,
+                        //     color: new ECharts.graphic.RadialGradient(0.4, 0.3, 1, [
+                        //         {
+                        //             offset: 0,
+                        //             color: 'rgb(251, 118, 123)'
+                        //         },
+                        //         {
+                        //             offset: 1,
+                        //             color: 'rgb(204, 46, 72)'
+                        //         }
+                        //     ])
+                        // }
                     }
                 ]
-            }
+            },
+            chartwidth: '600px',
+            chartheight: '400px'
         };
     },
     mounted() {
         this.updateData();
+
+        //初始化图表大小
+        this.changeChartSize();
     },
+
+    //设置窗口大小变化的监听函数
+    created() {
+        window.addEventListener('resize', this.changeChartSize);
+    },
+    destroyed() {
+        window.removeEventListener('resize', this.changeChartSize);
+    },
+
     watch: {
         $route(to, from) {
             // 对路由变化作出响应,当使用本页面传入不同参数时更新数据
@@ -290,6 +307,17 @@ export default {
         }
     },
     methods: {
+        //让图表大小自适应窗口
+        changeChartSize(e) {
+            // window.console.log(e, this.$refs.chartdiv.clientWidth + 'px', this.$refs.chartdiv.clientHeight + 'px');
+            // window.console.log(this.$refs.mychart, this.$refs.chartdiv);
+            this.chartwidth = this.$refs.chartdiv.clientWidth * 0.9 + 'px';
+            this.chartheight = this.$refs.chartdiv.clientHeight * 0.9 + 'px';
+            setTimeout(() => {
+                this.$refs.mychart.resize();
+            }, 100);
+        },
+
         updateData() {
             this.$axios
                 .get(this.baseUrl + '/api/section/' + this.$route.params.id)
@@ -357,11 +385,6 @@ export default {
 .schart-box {
     display: inline-block;
     margin: 0 20px 0 20px;
-}
-.schart {
-    width: 1000px;
-    height: 500px;
-    display: block;
 }
 .content-title {
     clear: both;

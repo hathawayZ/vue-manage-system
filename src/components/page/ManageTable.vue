@@ -24,6 +24,22 @@
                 <el-button type="primary" @click="onAdd">增加</el-button>
             </el-form-item>
         </el-form>
+
+        <el-form :inline="true">
+            <el-form-item label="插件访问地址">
+                <el-input readonly :value="apiAddress"></el-input>
+            </el-form-item>
+
+            <el-form-item>
+                <el-button
+                    type="primary"
+                    v-clipboard:copy="apiAddress"
+                    v-clipboard:success="onCopy"
+                    v-clipboard:error="onError"
+                >复制插件地址</el-button>
+            </el-form-item>
+        </el-form>
+
         <el-table ref="filterTable" :data="tableData" style="width: 100%">
             <template v-for="item in tableColumn">
                 <el-table-column
@@ -163,7 +179,9 @@ export default {
             dialogVisible: false,
             dialogAction: 'add', // 'add' or 'edit'
             editId: null,
-            pageTitle: ''
+            pageTitle: '',
+            apiBaseAddress: 'http://localhost:8082/#/tool/', //插件网页的地址
+            apiKey: ''
         };
     },
     mounted() {
@@ -178,9 +196,22 @@ export default {
     computed: {
         dialogTitle() {
             return this.dialogAction == 'add' ? '新增' : '修改';
+        },
+        apiAddress() {
+            return this.apiBaseAddress + this.$route.params.id + '/' + this.apiKey;
         }
     },
     methods: {
+        onCopy() {
+            this.$message({
+                type: 'success',
+                message: '复制到剪贴板成功!'
+            });
+        },
+        onError() {
+            this.$message.error('复制到剪贴板失败');
+        },
+
         getPlaceholder(type) {
             if (type === 'monthrange') {
                 return {
@@ -212,6 +243,8 @@ export default {
                 param.y_low = this.queryForm[1].date[0].getTime() / 1000;
                 param.y_high = this.queryForm[1].date[1].getTime() / 1000;
             }
+
+            var token = localStorage.getItem('ms_token');
             this.$axios
                 .get(this.baseUrl + '/api/section/' + this.$route.params.id)
                 .then(response => {
@@ -232,10 +265,12 @@ export default {
                     window.console.log(error);
                 });
 
+            //获取事件列表
             console.log('param is ', param);
             this.$axios
                 .get(this.baseUrl + '/api/section/' + this.$route.params.id + '/event', {
-                    params: param
+                    params: param,
+                    headers: { Authorization: 'Bearer ' + token }
                 })
                 .then(response => {
                     window.console.log(response);
@@ -251,6 +286,20 @@ export default {
                             y_ts: response.data[i].y
                         });
                     }
+                })
+                .catch(error => {
+                    window.console.log(error);
+                });
+
+            //获取api key
+            var username = localStorage.getItem('ms_username');
+            this.$axios
+                .get(this.baseUrl + '/api/user/' + username, {
+                    headers: { Authorization: 'Bearer ' + token }
+                })
+                .then(response => {
+                    console.log(response);
+                    this.apiKey = response.data.apikey;
                 })
                 .catch(error => {
                     window.console.log(error);

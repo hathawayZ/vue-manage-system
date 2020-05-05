@@ -81,14 +81,6 @@ export default {
             console.log(this.$route.path);
             return this.$route.path;
         }
-        // hasManageEvent() {
-        //     const role = localStorage.getItem('ms_username');
-        //     return role && this.manageitems.length != 0;
-        // },
-        // hasManageUser() {
-        //     const role = localStorage.getItem('ms_username');
-        //     return role === 'admin';
-        // }
     },
     methods: {
         updateData(redirect) {

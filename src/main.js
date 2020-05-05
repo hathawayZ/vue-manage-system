@@ -18,6 +18,9 @@ Vue.use(ElementUI, {
 //     messages
 // });
 
+import VueClipboard from 'vue-clipboard2';
+Vue.use(VueClipboard);
+
 import axios from 'axios';
 Vue.prototype.$axios = axios //全局注册，使用方法为:this.$axios
 Vue.prototype.baseUrl = 'http://localhost:8080';

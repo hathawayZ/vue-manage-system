@@ -28,6 +28,16 @@
                         <el-link :href="scope.row.url" target="_blank">{{ scope.row.url }}</el-link>
                     </template>
                 </el-table-column>
+                <!-- <el-table-column
+                    v-else-if="item.prop === 'apikey'"
+                    :key="item.key"
+                    :label="item.label"
+                >
+                    <template slot-scope="scope">
+                        <el-input :value="scope.row.apikey"></el-input>
+                        <el-button ref="copyButton" :data-clipboard-text="scope.row.apikey">点我复制秘钥</el-button>
+                    </template>
+                </el-table-column>-->
                 <el-table-column v-else :prop="item.prop" :label="item.label" :key="item.key"></el-table-column>
             </template>
             <el-table-column prop="edit" label="操作" width="100">
@@ -134,6 +144,14 @@ export default {
                 {
                     prop: 'phone',
                     label: '手机号'
+                },
+                // {
+                //     prop: 'apikey',
+                //     label: '插件使用秘钥'
+                // },
+                {
+                    prop: 'api_use_count',
+                    label: '插件使用次数'
                 }
             ],
             tableData: [
@@ -151,6 +169,7 @@ export default {
     },
     mounted() {
         this.updateData();
+        new ClipboardJS('.btn');
     },
     watch: {
         $route(to, from) {
@@ -165,21 +184,26 @@ export default {
     },
     methods: {
         updateData() {
-            // 获取section信息
+            var token = localStorage.getItem('ms_token');
             this.$axios
-                .get(this.baseUrl + '/api/user')
+                .get(this.baseUrl + '/api/user', {
+                    headers: { Authorization: 'Bearer ' + token }
+                })
                 .then(response => {
                     this.tableData = [];
-                    for (var user of response.data) {
-                        this.tableData.push({
-                            id: user.id,
-                            username: user.username,
-                            password: user.password,
-                            name: user.name,
-                            email: user.email,
-                            phone: user.phone
-                        });
-                    }
+                    this.tableData = response.data;
+                    // for (var user of response.data) {
+                    //     this.tableData.push({
+                    //         id: user.id,
+                    //         username: user.username,
+                    //         password: user.password,
+                    //         name: user.name,
+                    //         email: user.email,
+                    //         phone: user.phone,
+                    //         apikey: user.apikey,
+                    //         api_use_count: user.api_use_count
+                    //     });
+                    // }
                 })
                 .catch(error => {
                     window.console.log(error);
