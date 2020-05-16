@@ -263,6 +263,11 @@ export default {
                 })
                 .catch(error => {
                     window.console.log(error);
+
+                    if (error.response.status == 401) {
+                        this.$router.push('/login');
+                        this.$message.error('用户验证失败，请重新登陆');
+                    }
                 });
 
             //获取事件列表
@@ -289,6 +294,10 @@ export default {
                 })
                 .catch(error => {
                     window.console.log(error);
+                    if (error.response.status == 401) {
+                        this.$router.push('/login');
+                        this.$message.error('用户验证失败，请重新登陆');
+                    }
                 });
 
             //获取api key
@@ -303,6 +312,10 @@ export default {
                 })
                 .catch(error => {
                     window.console.log(error);
+                    if (error.response.status == 401) {
+                        this.$router.push('/login');
+                        this.$message.error('用户验证失败，请重新登陆');
+                    }
                 });
         },
         formatter(row, column) {
@@ -360,6 +373,10 @@ export default {
                     .catch(error => {
                         this.$message.error(error);
                         window.console.log(error);
+                        if (error.response.status == 401) {
+                            this.$router.push('/login');
+                            this.$message.error('用户验证失败，请重新登陆');
+                        }
                     });
             } else {
                 console.log('edit event:', newEvent);
@@ -381,6 +398,10 @@ export default {
                     .catch(error => {
                         this.$message.error(error);
                         window.console.log(error);
+                        if (error.response.status == 401) {
+                            this.$router.push('/login');
+                            this.$message.error('用户验证失败，请重新登陆');
+                        }
                     });
             }
         },
@@ -432,6 +453,10 @@ export default {
                         .catch(error => {
                             this.$message.error(error);
                             window.console.log(error);
+                            if (error.response.status == 401) {
+                                this.$router.push('/login');
+                                this.$message.error('用户验证失败，请重新登陆');
+                            }
                         });
                 })
                 .catch(() => {

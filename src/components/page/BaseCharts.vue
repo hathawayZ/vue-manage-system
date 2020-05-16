@@ -1,7 +1,15 @@
 <template>
-    <div class="container" ref="chartdiv" style="height: 90%">
+    <div class="container" ref="chartdiv" style="height: 85%">
         <div class="schart-box">
             <!-- <div class="content-title">回校统计</div> -->
+            <div class="group-unit-box">
+                事件聚集单位：
+                <el-radio-group v-model="groupRange" size="medium" @change="groupRangeChange">
+                    <el-radio label="1年"></el-radio>
+                    <el-radio label="5年"></el-radio>
+                    <el-radio label="10年"></el-radio>
+                </el-radio-group>
+            </div>
             <v-chart
                 ref="mychart"
                 v-bind:style="{ width: chartwidth, height: chartheight }"
@@ -277,7 +285,8 @@ export default {
                 ]
             },
             chartwidth: '600px',
-            chartheight: '400px'
+            chartheight: '400px',
+            groupRange: '1年'
         };
     },
     mounted() {
@@ -311,16 +320,33 @@ export default {
         changeChartSize(e) {
             // window.console.log(e, this.$refs.chartdiv.clientWidth + 'px', this.$refs.chartdiv.clientHeight + 'px');
             // window.console.log(this.$refs.mychart, this.$refs.chartdiv);
-            this.chartwidth = this.$refs.chartdiv.clientWidth * 0.9 + 'px';
-            this.chartheight = this.$refs.chartdiv.clientHeight * 0.9 + 'px';
+            this.chartwidth = this.$refs.chartdiv.clientWidth * 0.85 + 'px';
+            this.chartheight = this.$refs.chartdiv.clientHeight * 0.85 + 'px';
             setTimeout(() => {
                 this.$refs.mychart.resize();
             }, 100);
         },
 
+        // 聚集范围更改回调
+        groupRangeChange(dest) {
+            // console.log('group range change to:', dest);
+            this.updateData();
+        },
+
         updateData() {
+            var groupunit = 1;
+            if (this.groupRange == '1年') {
+                groupunit = 1;
+            } else if (this.groupRange == '5年') {
+                groupunit = 5;
+            } else {
+                groupunit = 10;
+            }
+            var param = { groupunit };
             this.$axios
-                .get(this.baseUrl + '/api/section/' + this.$route.params.id)
+                .get(this.baseUrl + '/api/section/' + this.$route.params.id, {
+                    params: param
+                })
                 .then(response => {
                     window.console.log(response);
                     this.bar.dataset.source = response.data.graph.data;
@@ -341,6 +367,10 @@ export default {
                 })
                 .catch(error => {
                     window.console.log(error);
+                    if (error.response.status == 401) {
+                        this.$router.push('/login');
+                        this.$message.error('用户验证失败，请重新登陆');
+                    }
                 });
         },
         clickBar(param) {
@@ -362,13 +392,15 @@ export default {
             // console.log(obj);
             return (
                 '<div style="border-bottom: 1px solid rgba(255,255,255,.3); font-size: 18px;padding-bottom: 7px;margin-bottom: 7px">' +
-                value[0] +
-                this.xUnit +
-                ' ' +
-                value[1] +
-                this.yUnit +
+                // value[0] +
+                // this.xUnit +
+                // ' ' +
+                // value[1] +
+                // this.yUnit +
+                // ', ' +
+                // this.dataname +
+                value[3] +
                 ', ' +
-                this.dataname +
                 '事件列表:' +
                 '</div>' +
                 schema
@@ -392,5 +424,10 @@ export default {
     line-height: 50px;
     font-size: 22px;
     color: #1f2f3d;
+}
+.group-unit-box {
+    padding: 10px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
 }
 </style>

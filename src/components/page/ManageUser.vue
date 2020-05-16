@@ -207,6 +207,10 @@ export default {
                 })
                 .catch(error => {
                     window.console.log(error);
+                    if (error.response.status == 401) {
+                        this.$router.push('/login');
+                        this.$message.error('用户验证失败，请重新登陆');
+                    }
                 });
         },
         clearDialog() {
@@ -258,6 +262,10 @@ export default {
                     .catch(error => {
                         this.$message.error(error);
                         window.console.log(error);
+                        if (error.response.status == 401) {
+                            this.$router.push('/login');
+                            this.$message.error('用户验证失败，请重新登陆');
+                        }
                     });
             } else {
                 console.log('edit section:', newuser);
@@ -278,6 +286,10 @@ export default {
                     .catch(error => {
                         this.$message.error(error);
                         window.console.log(error);
+                        if (error.response.status == 401) {
+                            this.$router.push('/login');
+                            this.$message.error('用户验证失败，请重新登陆');
+                        }
                     });
             }
         },
@@ -331,6 +343,10 @@ export default {
                         .catch(error => {
                             this.$message.error(error);
                             window.console.log(error);
+                            if (error.response.status == 401) {
+                                this.$router.push('/login');
+                                this.$message.error('用户验证失败，请重新登陆');
+                            }
                         });
                 })
                 .catch(error => {
