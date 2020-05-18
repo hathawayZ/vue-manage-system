@@ -43,7 +43,12 @@
             <el-table-column prop="edit" label="操作" width="100">
                 <template slot-scope="scope">
                     <el-button type="text" size="small" @click="onEdit(scope)">编辑</el-button>
-                    <el-button type="text" size="small" @click="onDelete(scope)">删除</el-button>
+                    <el-button
+                        v-if="scope.row.username != 'admin'"
+                        type="text"
+                        size="small"
+                        @click="onDelete(scope)"
+                    >删除</el-button>
                 </template>
             </el-table-column>
         </el-table>
@@ -320,13 +325,9 @@ export default {
             })
                 .then(() => {
                     this.$axios
-                        .delete(
-                            this.baseUrl + '/api/user/' + ele.row.username,
-                            {},
-                            {
-                                headers: { Authorization: 'Bearer ' + token }
-                            }
-                        )
+                        .delete(this.baseUrl + '/api/user/' + ele.row.username, {
+                            headers: { Authorization: 'Bearer ' + token }
+                        })
                         .then(response => {
                             console.log(response);
                             if (response.data == 'ok') {
@@ -346,6 +347,8 @@ export default {
                             if (error.response.status == 401) {
                                 this.$router.push('/login');
                                 this.$message.error('用户验证失败，请重新登陆');
+                            } else if (error.response.status == 400) {
+                                this.$message.error('删除失败，请删除用户的所有栏目后重试');
                             }
                         });
                 })

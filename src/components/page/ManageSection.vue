@@ -56,6 +56,39 @@
                             type="year"
                             placeholder="选择年"
                         ></el-date-picker>
+                        <div v-else-if="item.type == 'axisInfo'">
+                            <el-radio v-model="axisInfo.type" label="0">连续值</el-radio>
+                            <el-radio v-model="axisInfo.type" label="1">离散值</el-radio>
+                            <div v-if="axisInfo.type == '0'">
+                                <el-form-item label="x轴单位" key="100">
+                                    <el-input v-model="axisInfo.unit"></el-input>
+                                </el-form-item>
+                            </div>
+                            <el-form-item v-else label="分类层级" key="101">
+                                <el-tag
+                                    :key="tag"
+                                    v-for="tag in axisInfo.fieldList"
+                                    closable
+                                    :disable-transitions="false"
+                                    @close="handleClose(tag)"
+                                >{{tag}}</el-tag>
+                                <el-input
+                                    class="input-new-tag"
+                                    v-if="inputVisible"
+                                    v-model="inputValue"
+                                    ref="saveTagInput"
+                                    size="small"
+                                    @keyup.enter.native="handleInputConfirm"
+                                    @blur="handleInputConfirm"
+                                ></el-input>
+                                <el-button
+                                    v-else
+                                    class="button-new-tag"
+                                    size="small"
+                                    @click="showInput"
+                                >+ 层级</el-button>
+                            </el-form-item>
+                        </div>
                     </el-form-item>
                 </template>
             </el-form>
@@ -98,6 +131,10 @@ export default {
                     data: '',
                     type: 'text'
                 },
+                // {
+                //     label: 'x轴信息',
+                //     type: 'axisInfo'
+                // },
                 {
                     label: 'x轴单位',
                     data: '',
@@ -109,9 +146,9 @@ export default {
                     type: 'text'
                 },
                 {
-                    label: 'y轴单位',
-                    data: '',
-                    type: 'text'
+                    label: 'y轴信息',
+                    data: 'nouse',
+                    type: 'axisInfo'
                 }
             ],
             tableColumn: [
@@ -132,8 +169,16 @@ export default {
                     label: 'y轴标题'
                 },
                 {
+                    prop: 'y_type',
+                    label: 'y轴类型'
+                },
+                {
                     prop: 'y_unit',
                     label: 'y轴单位'
+                },
+                {
+                    prop: 'y_fields',
+                    label: 'y轴分类'
                 },
                 {
                     prop: 'belongto',
@@ -152,7 +197,14 @@ export default {
             dialogVisible: false,
             dialogAction: 'add', // 'add' or 'edit'
             editId: null,
-            showBelongto: false
+            showBelongto: false,
+            axisInfo: {
+                type: '0', // 0表示连续数字，1表示离散值
+                fieldList: [], //如果是离散值，是层级的列表
+                unit: '' //如果是连续，是单位
+            },
+            inputVisible: false,
+            inputValue: ''
         };
     },
     mounted() {
@@ -188,7 +240,10 @@ export default {
                                 x_unit: section.graph.x_axis.unit,
                                 y_title: section.graph.y_axis.title,
                                 y_unit: section.graph.y_axis.unit,
-                                belongto: section.belongto
+                                y_type: section.graph.y_axis.type,
+                                y_fields: section.graph.y_axis.fields.join('/'),
+                                belongto: section.belongto,
+                                fields: section.graph.y_axis.fields
                             });
                         }
                     }
@@ -201,10 +256,16 @@ export default {
                     }
                 });
         },
+
         clearDialog() {
             for (var i = 0; i < this.newForm.length; i++) {
                 this.newForm[i].data = '';
             }
+            this.axisInfo = {
+                type: '0', // 0表示连续数字，1表示离散值
+                fieldList: [], //如果是离散值，是层级的列表
+                unit: '' //如果是连续，是单位
+            };
         },
         onAdd() {
             this.dialogVisible = true;
@@ -214,7 +275,7 @@ export default {
         onSubmit() {
             // this.dialogVisible = false;
             for (var i = 0; i < this.newForm.length; i++) {
-                if (!this.newForm[i].data) {
+                if (!this.newForm[i].data && this.newForm[i].label != 'y轴信息') {
                     this.$message.error('请输入' + this.newForm[i].label);
                     return;
                 }
@@ -228,7 +289,9 @@ export default {
                     },
                     y_axis: {
                         title: this.newForm[3].data,
-                        unit: this.newForm[4].data
+                        type: this.axisInfo.type,
+                        unit: this.axisInfo.type == '0' ? this.axisInfo.unit : '',
+                        fields: this.axisInfo.type == '1' ? this.axisInfo.fieldList : []
                     }
                 }
             };
@@ -301,7 +364,9 @@ export default {
             this.newForm[1].data = ele.row.x_title;
             this.newForm[2].data = ele.row.x_unit;
             this.newForm[3].data = ele.row.y_title;
-            this.newForm[4].data = ele.row.y_unit;
+            this.axisInfo.type = ele.row.y_type == '连续值' ? '0' : '1';
+            this.axisInfo.unit = ele.row.y_unit;
+            this.axisInfo.fieldList = ele.row.fields;
         },
         onDelete(ele) {
             console.log('delete ', ele.row.id);
@@ -314,13 +379,9 @@ export default {
             })
                 .then(() => {
                     this.$axios
-                        .delete(
-                            this.baseUrl + '/api/section/' + ele.row.id,
-                            {},
-                            {
-                                headers: { Authorization: 'Bearer ' + token }
-                            }
-                        )
+                        .delete(this.baseUrl + '/api/section/' + ele.row.id, {
+                            headers: { Authorization: 'Bearer ' + token }
+                        })
                         .then(response => {
                             console.log(response);
                             if (response.data == 'ok') {
@@ -353,9 +414,44 @@ export default {
         },
         refreshSidebar() {
             bus.$emit('updateSidebar', false);
+        },
+
+        //////////////用于实现新建时的添加标签
+        handleClose(tag) {
+            this.axisInfo.fieldList.splice(this.axisInfo.fieldList.indexOf(tag), 1);
+        },
+        showInput() {
+            this.inputVisible = true;
+            this.$nextTick(_ => {
+                this.$refs.saveTagInput.$refs.input.focus();
+            });
+        },
+        handleInputConfirm() {
+            let inputValue = this.inputValue;
+            if (inputValue) {
+                this.axisInfo.fieldList.push(inputValue);
+            }
+            this.inputVisible = false;
+            this.inputValue = '';
         }
     }
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.el-tag + .el-tag {
+    margin-left: 10px;
+}
+.button-new-tag {
+    margin-left: 10px;
+    height: 32px;
+    line-height: 30px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+.input-new-tag {
+    width: 90px;
+    margin-left: 10px;
+    vertical-align: bottom;
+}
+</style>

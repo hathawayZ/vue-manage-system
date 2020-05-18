@@ -46,14 +46,14 @@
                     v-if="item.prop === 'x' || item.prop === 'y'"
                     :prop="item.prop"
                     :label="item.label"
-                    :key="item.key"
+                    :key="item.label"
                     sortable
                 ></el-table-column>
                 <el-table-column
                     v-else-if="item.prop === 'url'"
                     :prop="item.prop"
                     :label="item.label"
-                    :key="item.key"
+                    :key="item.label"
                     sortable
                 >
                     <template slot-scope="scope">
@@ -139,6 +139,28 @@ export default {
                     type: 'text'
                 }
             ],
+            newFormOri: [
+                {
+                    label: '返校时间',
+                    data: '',
+                    type: 'date'
+                },
+                {
+                    label: '入学年份',
+                    data: '',
+                    type: 'year'
+                },
+                {
+                    label: '新闻标题',
+                    data: '',
+                    type: 'text'
+                },
+                {
+                    label: '新闻链接',
+                    data: '',
+                    type: 'text'
+                }
+            ],
             queryForm: [
                 {
                     label: '返校时间',
@@ -169,6 +191,24 @@ export default {
                     label: '新闻链接'
                 }
             ],
+            tableColumnOri: [
+                {
+                    prop: 'x',
+                    label: '返校时间'
+                },
+                {
+                    prop: 'y',
+                    label: '入学年份'
+                },
+                {
+                    prop: 'name',
+                    label: '新闻标题'
+                },
+                {
+                    prop: 'url',
+                    label: '新闻链接'
+                }
+            ],
             tableData: [
                 {
                     date: '2016-05-02',
@@ -181,7 +221,9 @@ export default {
             editId: null,
             pageTitle: '',
             apiBaseAddress: 'http://localhost:8082/#/tool/', //插件网页的地址
-            apiKey: ''
+            apiKey: '',
+            axisType: '连续值',
+            fields: []
         };
     },
     mounted() {
@@ -212,6 +254,16 @@ export default {
             this.$message.error('复制到剪贴板失败');
         },
 
+        resetAxisType() {
+            // 重置y轴类型
+            this.newForm = [];
+            this.tableColumn = [];
+            this.newForm = this.newFormOri;
+            this.tableColumn = this.tableColumnOri;
+            this.axisType = '连续值';
+            this.fields = [];
+        },
+
         getPlaceholder(type) {
             if (type === 'monthrange') {
                 return {
@@ -231,69 +283,105 @@ export default {
             this.updateData();
         },
         updateData() {
-            // 获取section信息
-            var param = {};
-            if (this.queryForm[0].date) {
-                // console.log('search x:', this.queryForm[0].date);
-                param.x_low = this.queryForm[0].date[0].getTime() / 1000;
-                param.x_high = this.queryForm[0].date[1].getTime() / 1000;
-            }
-            if (this.queryForm[1].date) {
-                // console.log('search y:', this.queryForm[1].date);
-                param.y_low = this.queryForm[1].date[0].getTime() / 1000;
-                param.y_high = this.queryForm[1].date[1].getTime() / 1000;
-            }
+            // this.resetAxisType();
 
+            // 获取section信息
             var token = localStorage.getItem('ms_token');
             this.$axios
-                .get(this.baseUrl + '/api/section/' + this.$route.params.id)
+                .get(this.baseUrl + '/api/section/' + this.$route.params.id, {
+                    params: { groupunit: 1, ygroup: '不聚集' }
+                })
                 .then(response => {
                     window.console.log('get section ', this.$route.params.id, response);
                     var xtitle = response.data.graph.x_axis.title;
                     var ytitle = response.data.graph.y_axis.title;
+                    var type = response.data.graph.y_axis.type;
 
+                    this.axisType = type;
                     this.queryForm[0].label = xtitle;
                     this.queryForm[1].label = ytitle;
-                    this.newForm[0].label = xtitle;
-                    this.newForm[1].label = ytitle;
-                    this.tableColumn[0].label = xtitle;
-                    this.tableColumn[1].label = ytitle;
+                    if (type == '连续值') {
+                        this.newForm = [
+                            {
+                                label: '返校时间',
+                                data: '',
+                                type: 'date'
+                            },
+                            {
+                                label: '入学年份',
+                                data: '',
+                                type: 'year'
+                            },
+                            {
+                                label: '新闻标题',
+                                data: '',
+                                type: 'text'
+                            },
+                            {
+                                label: '新闻链接',
+                                data: '',
+                                type: 'text'
+                            }
+                        ];
+                        this.tableColumn = [
+                            {
+                                prop: 'x',
+                                label: '返校时间'
+                            },
+                            {
+                                prop: 'y',
+                                label: '入学年份'
+                            },
+                            {
+                                prop: 'name',
+                                label: '新闻标题'
+                            },
+                            {
+                                prop: 'url',
+                                label: '新闻链接'
+                            }
+                        ];
+
+                        this.newForm[0].label = xtitle;
+                        this.tableColumn[0].label = xtitle;
+                        this.newForm[1].label = ytitle;
+                        this.tableColumn[1].label = ytitle;
+
+                        this.fields = [];
+                    } else {
+                        var newFormAdd = [];
+                        var tableColumnAdd = [];
+                        var newnewform = this.newFormOri.slice();
+                        var newcolumn = this.tableColumnOri.slice();
+                        for (var field of response.data.graph.y_axis.fields) {
+                            newFormAdd.push({
+                                label: ytitle + ':' + field,
+                                data: '',
+                                type: 'text'
+                            });
+                            tableColumnAdd.push({
+                                prop: 'y:' + field,
+                                label: ytitle + ':' + field
+                            });
+                        }
+                        newnewform.splice(1, 1, ...newFormAdd);
+                        newcolumn.splice(1, 1, ...tableColumnAdd);
+                        this.newForm = newnewform;
+                        this.tableColumn = newcolumn;
+
+                        this.newForm[0].label = xtitle;
+                        this.tableColumn[0].label = xtitle;
+
+                        this.fields = response.data.graph.y_axis.fields;
+                    }
 
                     this.pageTitle = response.data.name;
+
+                    this.getEventList();
                 })
                 .catch(error => {
                     window.console.log(error);
 
-                    if (error.response.status == 401) {
-                        this.$router.push('/login');
-                        this.$message.error('用户验证失败，请重新登陆');
-                    }
-                });
-
-            //获取事件列表
-            console.log('param is ', param);
-            this.$axios
-                .get(this.baseUrl + '/api/section/' + this.$route.params.id + '/event', {
-                    params: param,
-                    headers: { Authorization: 'Bearer ' + token }
-                })
-                .then(response => {
-                    window.console.log(response);
-                    this.tableData = [];
-                    for (var i = 0; i < response.data.length; i++) {
-                        this.tableData.push({
-                            id: response.data[i].id,
-                            x: timeStamp2String(response.data[i].x),
-                            y: timeStamp2String(response.data[i].y).slice(0, 4),
-                            name: response.data[i].name,
-                            url: response.data[i].url,
-                            x_ts: response.data[i].x,
-                            y_ts: response.data[i].y
-                        });
-                    }
-                })
-                .catch(error => {
-                    window.console.log(error);
                     if (error.response.status == 401) {
                         this.$router.push('/login');
                         this.$message.error('用户验证失败，请重新登陆');
@@ -309,6 +397,55 @@ export default {
                 .then(response => {
                     console.log(response);
                     this.apiKey = response.data.apikey;
+                })
+                .catch(error => {
+                    window.console.log(error);
+                    if (error.response.status == 401) {
+                        this.$router.push('/login');
+                        this.$message.error('用户验证失败，请重新登陆');
+                    }
+                });
+        },
+        getEventList(param) {
+            //获取事件列表
+            var token = localStorage.getItem('ms_token');
+            var param = {};
+            if (this.queryForm[0].date) {
+                // console.log('search x:', this.queryForm[0].date);
+                param.x_low = this.queryForm[0].date[0].getTime() / 1000;
+                param.x_high = this.queryForm[0].date[1].getTime() / 1000;
+            }
+            if (this.queryForm[1].date) {
+                // console.log('search y:', this.queryForm[1].date);
+                param.y_low = this.queryForm[1].date[0].getTime() / 1000;
+                param.y_high = this.queryForm[1].date[1].getTime() / 1000;
+            }
+            console.log('param is ', param);
+            this.$axios
+                .get(this.baseUrl + '/api/section/' + this.$route.params.id + '/event', {
+                    params: param,
+                    headers: { Authorization: 'Bearer ' + token }
+                })
+                .then(response => {
+                    // window.console.log(response);
+                    this.tableData = [];
+                    for (var i = 0; i < response.data.length; i++) {
+                        var obj = {
+                            id: response.data[i].id,
+                            x: timeStamp2String(response.data[i].x),
+                            y: this.axisType == '连续值' ? timeStamp2String(response.data[i].y).slice(0, 4) : 0,
+                            name: response.data[i].name,
+                            url: response.data[i].url,
+                            x_ts: response.data[i].x,
+                            y_ts: this.axisType == '连续值' ? response.data[i].y : 0,
+                            field_values: this.axisType == '离散值' ? response.data[i].y : []
+                        };
+                        for (var j = 0; j < this.fields.length && j < response.data[i].y.length; j++) {
+                            obj['y:' + this.fields[j]] = response.data[i].y[j];
+                        }
+                        // console.log(obj, response.data[i]);
+                        this.tableData.push(obj);
+                    }
                 })
                 .catch(error => {
                     window.console.log(error);
@@ -346,12 +483,19 @@ export default {
                     return;
                 }
             }
+            var field_values = [];
+            if (this.axisType == '离散值') {
+                for (var i = 1; i < this.newForm.length - 2; i++) {
+                    field_values.push(this.newForm[i].data);
+                }
+            }
             var newEvent = {
-                name: this.newForm[2].data,
+                name: this.newForm[this.newForm.length - 2].data,
                 desc: '',
                 x: this.newForm[0].data.getTime() / 1000,
-                y: this.newForm[1].data.getTime() / 1000,
-                url: this.newForm[3].data
+                y: this.axisType == '连续值' ? this.newForm[1].data.getTime() / 1000 : 0,
+                fields: field_values,
+                url: this.newForm[this.newForm.length - 1].data
             };
             var token = localStorage.getItem('ms_token');
             if (this.dialogAction == 'add') {
@@ -415,9 +559,15 @@ export default {
 
             // set origin data
             this.newForm[0].data = new Date(ele.row.x_ts * 1000);
-            this.newForm[1].data = new Date(ele.row.y_ts * 1000);
-            this.newForm[2].data = ele.row.name;
-            this.newForm[3].data = ele.row.url;
+            this.newForm[this.newForm.length - 2].data = ele.row.name;
+            this.newForm[this.newForm.length - 1].data = ele.row.url;
+            if (this.axisType == '连续值') {
+                this.newForm[1].data = new Date(ele.row.y_ts * 1000);
+            } else {
+                for (var i = 1; i < this.newForm.length - 2; i++) {
+                    this.newForm[i].data = ele.row.field_values[i - 1];
+                }
+            }
         },
         onDelete(ele) {
             console.log('delete ', ele.row.id);
@@ -430,13 +580,9 @@ export default {
             })
                 .then(() => {
                     this.$axios
-                        .delete(
-                            this.baseUrl + '/api/section/' + this.$route.params.id + '/event/' + ele.row.id,
-                            {},
-                            {
-                                headers: { Authorization: 'Bearer ' + token }
-                            }
-                        )
+                        .delete(this.baseUrl + '/api/section/' + this.$route.params.id + '/event/' + ele.row.id, {
+                            headers: { Authorization: 'Bearer ' + token }
+                        })
                         .then(response => {
                             console.log(response);
                             if (response.data == 'ok') {
