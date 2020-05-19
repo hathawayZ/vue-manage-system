@@ -424,6 +424,7 @@ export default {
                     if (response.data.graph.y_axis.type == '连续值') {
                         this.bar.yAxis.axisLabel.formatter = '{value} ' + response.data.graph.y_axis.unit;
                         this.bar.yAxis.axisPointer.label.formatter = this.bar.yAxis.axisLabel.formatter;
+                        this.bar.yAxis.axisPointer.label.show = true;
                         this.yUnit = response.data.graph.y_axis.unit;
                     } else {
                         this.ylabels = [];
@@ -440,6 +441,7 @@ export default {
                         this.bar.yAxis.axisLabel.formatter = (value, index) => {
                             return this.ylabels[index - 1];
                         };
+                        this.bar.yAxis.axisPointer.label.show = false;
                         // this.bar.yAxis.axisPointer.label.formatter = this.bar.yAxis.axisLabel.formatter;
                     }
 
