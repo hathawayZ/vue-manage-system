@@ -8,11 +8,20 @@
             <el-form-item v-for="(item, index) in queryForm" :key="index" :label="item.label">
                 <el-date-picker
                     v-model="item.date"
+                    v-if="item.type != 'selectClass'"
                     :type="item.type"
                     range-separator="至"
                     :start-placeholder="getPlaceholder(item.type).start"
                     :end-placeholder="getPlaceholder(item.type).end"
                 ></el-date-picker>
+                <div v-else class="block">
+                    <el-cascader
+                        v-model="selectedClass"
+                        :options="classOptions"
+                        :props="{ checkStrictly: true }"
+                        clearable
+                    ></el-cascader>
+                </div>
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="onQuery">查询</el-button>
@@ -170,7 +179,7 @@ export default {
                 {
                     label: '入学年份',
                     date: '',
-                    type: 'monthrange'
+                    type: 'selectClass'
                 }
             ],
             tableColumn: [
@@ -223,7 +232,26 @@ export default {
             apiBaseAddress: 'http://localhost:8082/#/tool/', //插件网页的地址
             apiKey: '',
             axisType: '连续值',
-            fields: []
+            fields: [],
+            classOptions: [
+                {
+                    value: 'zhinan',
+                    label: '指南',
+                    children: [
+                        {
+                            value: 'shejiyuanze',
+                            label: '设计原则',
+                            children: [
+                                {
+                                    value: 'yizhi',
+                                    label: '一致'
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            selectedClass: ''
         };
     },
     mounted() {
@@ -280,6 +308,7 @@ export default {
         onClearSearch() {
             this.queryForm[0].date = '';
             this.queryForm[1].date = '';
+            this.selectedClass = '';
             this.updateData();
         },
         updateData() {
@@ -373,6 +402,8 @@ export default {
                         this.tableColumn[0].label = xtitle;
 
                         this.fields = response.data.graph.y_axis.fields;
+
+                        this.getAllClasses();
                     }
 
                     this.pageTitle = response.data.name;
@@ -420,6 +451,10 @@ export default {
                 param.y_low = this.queryForm[1].date[0].getTime() / 1000;
                 param.y_high = this.queryForm[1].date[1].getTime() / 1000;
             }
+            if (this.selectedClass) {
+                param.y_class = JSON.stringify(this.selectedClass);
+            }
+            // console.log('y_class:', this.selectedClass);
             console.log('param is ', param);
             this.$axios
                 .get(this.baseUrl + '/api/section/' + this.$route.params.id + '/event', {
@@ -446,6 +481,53 @@ export default {
                         // console.log(obj, response.data[i]);
                         this.tableData.push(obj);
                     }
+                })
+                .catch(error => {
+                    window.console.log(error);
+                    if (error.response.status == 401) {
+                        this.$router.push('/login');
+                        this.$message.error('用户验证失败，请重新登陆');
+                    }
+                });
+        },
+        generateLevel(curresp) {
+            var curlist = [];
+            for (var k in curresp) {
+                var curobj = { value: k, label: k };
+                if (curresp[k]) {
+                    curobj.children = this.generateLevel(curresp[k]);
+                }
+                curlist.push(curobj);
+            }
+            return curlist;
+        },
+        getAllClasses() {
+            //获取事件列表
+            var token = localStorage.getItem('ms_token');
+            this.$axios
+                .get(this.baseUrl + '/api/section/' + this.$route.params.id + '/fields', {
+                    headers: { Authorization: 'Bearer ' + token }
+                })
+                .then(response => {
+                    window.console.log(response);
+                    var newOptions = {
+                        value: 'zhinan',
+                        label: '指南',
+                        children: [
+                            {
+                                value: 'shejiyuanze',
+                                label: '设计原则',
+                                children: [
+                                    {
+                                        value: 'yizhi',
+                                        label: '一致'
+                                    }
+                                ]
+                            }
+                        ]
+                    };
+                    var newOpt = this.generateLevel(response.data);
+                    this.classOptions = newOpt;
                 })
                 .catch(error => {
                     window.console.log(error);
