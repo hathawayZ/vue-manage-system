@@ -327,7 +327,7 @@ export default {
             groupRange: '1',
             ygroupRange: '1',
             ygroupClass: '不聚集',
-            axisType: '未定',
+            axisType: '连续值',
             yClasses: [{ label: '学校' }, { label: '学部' }, { label: '学院' }],
             ylabels: []
         };
@@ -396,9 +396,7 @@ export default {
             //     groupunit = 10;
             // }
             var ygroup = 1;
-            if (this.axisType == '未定') {
-                ygroup = '未定';
-            } else if (this.axisType == '连续值') {
+            if (this.axisType == '连续值') {
                 ygroup = parseInt(this.ygroupRange);
             } else {
                 ygroup = this.ygroupClass;
@@ -446,13 +444,15 @@ export default {
                     }
 
                     this.bar.title.text = this.dataname + '气泡图';
+                    document.title = this.bar.title.text;
+                    // this.$router.meta.title = this.bar.title.text;
 
                     this.axisType = response.data.graph.y_axis.type;
                     this.yClasses = [];
                     for (var i = 0; i < response.data.graph.y_axis.fields.length; i++) {
                         this.yClasses.push({ label: response.data.graph.y_axis.fields[i] });
                     }
-                    console.log('yclasses:', this.yClasses);
+                    console.log('yclasses:', this.yClasses, this.axisType);
                 })
                 .catch(error => {
                     window.console.log(error);
@@ -467,7 +467,7 @@ export default {
             this.eventList = [];
             let list = param.data;
             for (let i = 0; i < list[2] * 2; i += 2) {
-                this.eventList.push({ url: list[i + 4], title: list[i + 5] });
+                this.eventList.push({ url: list[i + 5], title: list[i + 6] });
             }
             this.dialogVisible = true;
         },

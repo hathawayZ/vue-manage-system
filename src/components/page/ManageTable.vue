@@ -50,26 +50,26 @@
         </el-form>
 
         <el-table ref="filterTable" :data="tableData" style="width: 100%">
-            <template v-for="item in tableColumn">
+            <template v-for="(item, index) in tableColumn">
                 <el-table-column
                     v-if="item.prop === 'x' || item.prop === 'y'"
                     :prop="item.prop"
                     :label="item.label"
-                    :key="item.label"
+                    :key="index"
                     sortable
                 ></el-table-column>
                 <el-table-column
                     v-else-if="item.prop === 'url'"
                     :prop="item.prop"
                     :label="item.label"
-                    :key="item.label"
+                    :key="index"
                     sortable
                 >
                     <template slot-scope="scope">
                         <el-link :href="scope.row.url" target="_blank">{{ scope.row.url }}</el-link>
                     </template>
                 </el-table-column>
-                <el-table-column v-else :prop="item.prop" :label="item.label" :key="item.key"></el-table-column>
+                <el-table-column v-else :prop="item.prop" :label="item.label" :key="index"></el-table-column>
             </template>
             <el-table-column prop="edit" label="操作" width="100">
                 <template slot-scope="scope">
@@ -82,8 +82,8 @@
         <!-- 新建event对话框 -->
         <el-dialog :title="dialogTitle" :visible.sync="dialogVisible" width="30%">
             <el-form ref="form2" label-width="80px">
-                <template v-for="item in newForm">
-                    <el-form-item :label="item.label" :key="item.key">
+                <template v-for="(item, index) in newForm">
+                    <el-form-item :label="item.label" :key="index">
                         <el-input v-if="item.type == 'text'" v-model="item.data"></el-input>
                         <el-date-picker
                             v-else-if="item.type == 'date'"
@@ -179,7 +179,7 @@ export default {
                 {
                     label: '入学年份',
                     date: '',
-                    type: 'selectClass'
+                    type: 'monthrange'
                 }
             ],
             tableColumn: [
@@ -289,6 +289,7 @@ export default {
             this.newForm = this.newFormOri;
             this.tableColumn = this.tableColumnOri;
             this.axisType = '连续值';
+            this.queryForm[1].type = 'monthrange';
             this.fields = [];
         },
 
@@ -322,6 +323,8 @@ export default {
                 })
                 .then(response => {
                     window.console.log('get section ', this.$route.params.id, response);
+                    document.title = response.data.name + '事件管理';
+
                     var xtitle = response.data.graph.x_axis.title;
                     var ytitle = response.data.graph.y_axis.title;
                     var type = response.data.graph.y_axis.type;
@@ -330,6 +333,8 @@ export default {
                     this.queryForm[0].label = xtitle;
                     this.queryForm[1].label = ytitle;
                     if (type == '连续值') {
+                        this.queryForm[1].type = 'monthrange';
+
                         this.newForm = [
                             {
                                 label: '返校时间',
@@ -378,6 +383,8 @@ export default {
 
                         this.fields = [];
                     } else {
+                        this.queryForm[1].type = 'selectClass';
+
                         var newFormAdd = [];
                         var tableColumnAdd = [];
                         var newnewform = this.newFormOri.slice();
@@ -494,6 +501,7 @@ export default {
             var curlist = [];
             for (var k in curresp) {
                 var curobj = { value: k, label: k };
+                // console.log(curresp);
                 if (curresp[k]) {
                     curobj.children = this.generateLevel(curresp[k]);
                 }
@@ -510,22 +518,22 @@ export default {
                 })
                 .then(response => {
                     window.console.log(response);
-                    var newOptions = {
-                        value: 'zhinan',
-                        label: '指南',
-                        children: [
-                            {
-                                value: 'shejiyuanze',
-                                label: '设计原则',
-                                children: [
-                                    {
-                                        value: 'yizhi',
-                                        label: '一致'
-                                    }
-                                ]
-                            }
-                        ]
-                    };
+                    // var newOptions = {
+                    //     value: 'zhinan',
+                    //     label: '指南',
+                    //     children: [
+                    //         {
+                    //             value: 'shejiyuanze',
+                    //             label: '设计原则',
+                    //             children: [
+                    //                 {
+                    //                     value: 'yizhi',
+                    //                     label: '一致'
+                    //                 }
+                    //             ]
+                    //         }
+                    //     ]
+                    // };
                     var newOpt = this.generateLevel(response.data);
                     this.classOptions = newOpt;
                 })
@@ -541,7 +549,7 @@ export default {
             return row.address;
         },
         onQuery() {
-            if (this.queryForm[0].date || this.queryForm[1].date) {
+            if (this.queryForm[0].date || this.queryForm[1].date || this.selectedClass) {
                 this.updateData();
             } else {
                 this.$message.error('请输入搜索条件');

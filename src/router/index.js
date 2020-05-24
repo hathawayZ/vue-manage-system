@@ -52,7 +52,7 @@ export default new Router({
                     path: '/chart/:id',
                     component: () => import( /* webpackChunkName: "chart" */ '../components/page/BaseCharts.vue'),
                     meta: {
-                        title: 'schart图表'
+                        title: '气泡图展示'
                     }
                 },
                 // {

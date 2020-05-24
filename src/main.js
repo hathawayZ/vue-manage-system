@@ -27,7 +27,7 @@ Vue.prototype.baseUrl = 'http://localhost:8080';
 
 //使用钩子函数对路由进行权限跳转
 router.beforeEach((to, from, next) => {
-    document.title = `${to.meta.title} | vue-manage-system`;
+    document.title = `${to.meta.title}`;
     const role = localStorage.getItem('ms_username');
     console.log(to);
     // if (!role && to.path !== '/login') {
